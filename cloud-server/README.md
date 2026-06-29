@@ -11,7 +11,7 @@ cp .env.example .env
 npm start
 ```
 
-Server runs at **http://localhost:3847** and also serves the landing page.
+Server runs at **http://localhost:3847** (API only — landing is on Vercel).
 
 ## Deploy to Render
 

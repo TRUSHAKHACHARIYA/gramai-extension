@@ -9,11 +9,9 @@
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
-const path = require('path');
 const { loadJson, saveJson } = require('./lib/store');
 const {
   loadLicenses,
-  saveLicenses,
   generateLicenseKey,
   activateLicense,
 } = require('./lib/licenses');
@@ -358,8 +356,6 @@ app.get('/v1/dashboard', authMiddleware, (req, res) => {
     team: team ? { id: teamId, name: team.name, members: team.members, usage: team.usage, styleGuides: team.styleGuides } : null,
   });
 });
-
-app.use(express.static(path.join(__dirname, '..', 'landing')));
 
 app.listen(PORT, () => {
   console.log(`GramAI Cloud Server running on http://localhost:${PORT}`);

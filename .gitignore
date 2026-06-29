@@ -2,8 +2,6 @@
 node_modules/
 
 # Environment & secrets
-.env
-.env.*
 *.pem
 
 # OS files
@@ -16,9 +14,9 @@ desktop.ini
 npm-debug.log*
 
 # Editor
-.vscode/
 .idea/
 
 # Build artifacts
 dist/
 build/
+config.bat
