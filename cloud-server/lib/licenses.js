@@ -37,8 +37,6 @@ function activateLicense(licenses, { key, tier, email, teamId, role }) {
 
 module.exports = {
   loadLicenses,
-  saveLicenses,
   generateLicenseKey,
   activateLicense,
-  DEFAULT_LICENSES,
 };
