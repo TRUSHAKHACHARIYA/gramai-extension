@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="80" y="120" font-family="system-ui,sans-serif" font-size="28" fill="rgba(255,255,255,.75)">( GramAI</text>
+  <text x="80" y="280" font-family="system-ui,sans-serif" font-size="64" font-weight="800" fill="#fff">AI writing assistant that</text>
+  <text x="80" y="360" font-family="system-ui,sans-serif" font-size="64" font-weight="800" fill="#C7D2FE">never reads your writing</text>
+  <text x="80" y="460" font-family="system-ui,sans-serif" font-size="28" fill="rgba(255,255,255,.85)">100% local · Free forever · 42% cheaper than Grammarly</text>
+  <rect x="80" y="510" width="280" height="56" rx="12" fill="#fff"/>
+  <text x="110" y="548" font-family="system-ui,sans-serif" font-size="22" font-weight="700" fill="#4F46E5">gramai-extension.vercel.app</text>
+</svg>

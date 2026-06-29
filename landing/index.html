@@ -5,10 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GramAI — AI Writing Assistant That Never Reads Your Writing</title>
   <meta name="description" content="Free AI grammar, rewrite & tone tools. 100% local with Ollama, or Pro Cloud with zero setup. 42% cheaper than Grammarly.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>✨</text></svg>">
+  <meta property="og:title" content="GramAI — AI Writing Assistant That Never Reads Your Writing">
+  <meta property="og:description" content="Free AI grammar, rewrite & tone tools. 100% local. 42% cheaper than Grammarly.">
+  <meta property="og:image" content="https://gramai-extension.vercel.app/og-image.svg">
+  <meta property="og:url" content="https://gramai-extension.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GramAI — AI Writing Assistant That Never Reads Your Writing">
+  <meta name="twitter:description" content="Free AI grammar, rewrite & tone tools. 100% local. 42% cheaper than Grammarly.">
+  <meta name="twitter:image" content="https://gramai-extension.vercel.app/og-image.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Privacy-friendly analytics — replace data-domain when using Plausible -->
+  <script defer data-domain="gramai-extension.vercel.app" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 
@@ -18,13 +30,23 @@
       <a href="#" class="nav-logo">
         <span class="logo-mark">✨</span>GramAI
       </a>
-      <div class="nav-links">
+      <div class="nav-links" id="nav-links">
         <a href="#features">Features</a>
         <a href="#compare">vs Grammarly</a>
         <a href="#pricing">Pricing</a>
         <a href="#privacy">Privacy</a>
+        <a href="#faq">FAQ</a>
       </div>
-      <a href="#cta" class="btn btn-primary btn-sm nav-cta">Add to Chrome — Free</a>
+      <button class="nav-hamburger" id="nav-hamburger" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+      <a href="#" class="btn btn-primary btn-sm nav-cta install-trigger">Install Extension — Free</a>
+    </div>
+    <div class="nav-mobile-menu" id="nav-mobile-menu" hidden>
+      <a href="#features">Features</a>
+      <a href="#compare">vs Grammarly</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#faq">FAQ</a>
+      <a href="#" class="btn btn-primary install-trigger">Install Extension — Free</a>
     </div>
   </nav>
 
@@ -39,14 +61,31 @@
           Or go Pro Cloud with zero setup. No subscriptions required to start.
         </p>
         <div class="hero-cta">
-          <a href="#cta" class="btn btn-primary btn-lg">Add to Chrome — Free</a>
+          <a href="#" class="btn btn-primary btn-lg install-trigger">Install Extension — Free</a>
           <a href="#how" class="btn btn-ghost btn-lg">See how it works →</a>
         </div>
         <div class="hero-stats">
-          <div class="stat"><strong>$0</strong><span>Forever free (local)</span></div>
-          <div class="stat"><strong>30s</strong><span>Pro Cloud setup</span></div>
-          <div class="stat"><strong>42%</strong><span>Cheaper than Grammarly</span></div>
-          <div class="stat"><strong>0</strong><span>Bytes sent to servers</span></div>
+          <div class="stat stat-privacy">
+            <strong>0</strong>
+            <span>Bytes sent to servers <em>(local mode)</em></span>
+          </div>
+          <div class="stat">
+            <strong>$0</strong>
+            <span>Forever free (local)</span>
+          </div>
+          <div class="stat stat-setup">
+            <strong class="stat-dual">
+              <span>~5 min</span>
+              <span class="stat-divider">/</span>
+              <span>30 sec</span>
+            </strong>
+            <span>Free local setup · Pro Cloud</span>
+          </div>
+          <div class="stat">
+            <strong>42%</strong>
+            <span>Cheaper than Grammarly<sup class="stat-fn">*</sup></span>
+            <small class="stat-footnote">*vs Grammarly Premium at $12/month</small>
+          </div>
         </div>
       </div>
 
@@ -60,18 +99,23 @@
             <span class="demo-url">gmail.com — compose</span>
           </div>
           <div class="demo-body">
-            <p class="demo-text" id="demo-text">Hi team, I wanted to <mark class="err">reach out</mark> about the <mark class="err">quarterly report</mark> we discussed.</p>
+            <div class="demo-before" id="demo-before">
+              <span class="phase-label">Before</span>
+              <p class="demo-text" id="demo-text">Hi team, I wanted to <mark class="err">reach out</mark> about the <mark class="err">quarterly report</mark> we discussed.</p>
+            </div>
             <div class="demo-toolbar">
               <button class="tb-btn active" data-demo="fix">✅ Fix</button>
               <button class="tb-btn" data-demo="rewrite">✍️ Rewrite</button>
               <button class="tb-btn" data-demo="score">📊 Score</button>
+              <button class="tb-btn" data-demo="explain">💡 Explain</button>
               <button class="tb-btn" data-demo="pro">👔 Pro</button>
-              <button class="tb-btn" data-demo="custom">🎯 Custom</button>
             </div>
-            <div class="demo-result" id="demo-result">
+            <div class="demo-result is-hidden" id="demo-result">
+              <span class="phase-label phase-after">After</span>
               <span class="result-label" id="demo-label">Grammar fixed</span>
-              <p id="demo-output">Hi team, I wanted to <span class="diff-del">reach out</span> <span class="diff-add">follow up</span> about the quarterly report we discussed.</p>
+              <div class="demo-output" id="demo-output"></div>
             </div>
+            <p class="demo-hint" id="demo-hint">Click a tool or watch the auto-demo ↻</p>
           </div>
         </div>
       </div>
@@ -80,20 +124,17 @@
 
   <!-- Social proof -->
   <section class="social-proof">
-    <p class="proof-label">Trusted by writers who care about privacy</p>
-    <div class="quotes">
-      <blockquote class="fade-up">
-        <p>"Finally a Grammarly alternative that doesn't upload my drafts to the cloud."</p>
-        <cite>— Sarah K., Technical Writer</cite>
-      </blockquote>
-      <blockquote class="fade-up">
-        <p>"The floating toolbar on Google Docs is a game changer. Setup took 2 minutes."</p>
-        <cite>— Marcus T., Product Manager</cite>
-      </blockquote>
-      <blockquote class="fade-up">
-        <p>"Our team style guides keep everyone's writing on-brand. Worth every penny."</p>
-        <cite>— Elena R., Marketing Lead</cite>
-      </blockquote>
+    <div class="social-proof-inner">
+      <a href="https://github.com/TRUSHAKHACHARIYA/gramai-extension" class="github-proof fade-up" target="_blank" rel="noopener noreferrer" id="github-proof">
+        <span class="github-stars" id="github-stars">⭐ —</span>
+        <span class="github-label">stars on GitHub</span>
+        <span class="github-meta" id="github-meta">Open source · MIT License</span>
+      </a>
+      <div class="proof-pills fade-up">
+        <span>🔒 Privacy-first</span>
+        <span>📖 Open source</span>
+        <span>🌐 Chrome · Edge · Brave · Firefox</span>
+      </div>
     </div>
   </section>
 
@@ -102,53 +143,106 @@
     <div class="inner">
       <span class="section-label">Features</span>
       <h2 class="section-h">Everything you need to write better</h2>
-      <p class="section-sub">9 AI tools available on every webpage — select any text and a toolbar appears instantly.</p>
+      <p class="section-sub">10 AI tools on every webpage — select any text and a toolbar appears instantly.</p>
+
+      <div class="works-everywhere fade-up">
+        <p class="works-label">Works everywhere you write</p>
+        <div class="site-pills">
+          <span>Gmail</span><span>Google Docs</span><span>Notion</span><span>Twitter/X</span>
+          <span>LinkedIn</span><span>Substack</span><span>WordPress</span><span>Outlook Web</span>
+          <span>GitHub</span><span>Slack Web</span><span>Word Online</span><span>Any text field</span>
+        </div>
+      </div>
+
+      <div class="tier-legend fade-up">
+        <span><i class="legend-dot legend-free"></i> Free</span>
+        <span><i class="legend-dot legend-pro"></i> Pro</span>
+        <span><i class="legend-dot legend-team"></i> Team</span>
+      </div>
 
       <div class="features-grid">
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
           <span class="fc-icon">✅</span>
-          <h3>Grammar Fix <span class="badge badge-free">Free</span></h3>
-          <p>Corrects spelling, grammar & punctuation in one click. Works on Gmail, Notion, Google Docs and everywhere else.</p>
+          <h3>Grammar Fix</h3>
+          <p>Corrects spelling, grammar & punctuation in one click.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
           <span class="fc-icon">✍️</span>
-          <h3>Rewrite + Diff <span class="badge badge-free">Free</span></h3>
+          <h3>Rewrite + Diff</h3>
           <p>Clearer, more engaging rewrites with a colour-coded diff so you see exactly what changed.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
           <span class="fc-icon">📊</span>
-          <h3>Writing Score <span class="badge badge-free">Free</span></h3>
-          <p>0–100 quality score with Grammar, Clarity & Style sub-scores and actionable feedback.</p>
+          <h3>Writing Score</h3>
+          <p>0–100 quality score with Grammar, Clarity & Style sub-scores. Scores stay consistent week to week.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
+          <span class="fc-icon">💡</span>
+          <h3>Explain</h3>
+          <p>Simplifies complex text into plain language. Great for legal, medical, or technical documents.</p>
+        </div>
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
           <span class="fc-icon">👔</span>
-          <h3>Tone Tools <span class="badge badge-free">Free</span></h3>
+          <h3>Tone Tools</h3>
           <p>Professional, friendly, casual or academic — rewrite any text in the right voice.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
           <span class="fc-icon">🌐</span>
-          <h3>Translate <span class="badge badge-free">Free</span></h3>
-          <p>15 languages supported — translate to or from English, not just one direction.</p>
+          <h3>Translate</h3>
+          <p>Bidirectional translation — not just English. Spanish, French, German, Hindi, Arabic, Japanese, Mandarin & more.</p>
+          <div class="lang-pills">
+            <span>ES</span><span>FR</span><span>DE</span><span>HI</span><span>AR</span><span>JA</span><span>ZH</span>
+          </div>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-pro fade-up">
+          <span class="fc-badge badge-pro">Pro</span>
           <span class="fc-icon">⚡</span>
-          <h3>Real-time Hints <span class="badge badge-pro">Pro</span></h3>
+          <h3>Real-time Hints</h3>
           <p>Grammar squiggles appear as you type — just like Grammarly, but your text never leaves your computer.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-pro fade-up">
+          <span class="fc-badge badge-pro">Pro</span>
           <span class="fc-icon">🎯</span>
-          <h3>Custom Prompts <span class="badge badge-pro">Pro</span></h3>
+          <h3>Custom Prompts</h3>
           <p>Type your own instruction: "Make this sound like Hemingway" or save reusable prompt buttons.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-team fade-up">
+          <span class="fc-badge badge-team">Team</span>
           <span class="fc-icon">📐</span>
-          <h3>Style Guides <span class="badge badge-team">Team</span></h3>
+          <h3>Style Guides</h3>
           <p>Share vocabulary rules and tone guidelines across your whole team with one click.</p>
         </div>
-        <div class="feature-card fade-up">
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
           <span class="fc-icon">📋</span>
-          <h3>History <span class="badge badge-free">Free</span></h3>
+          <h3>History</h3>
           <p>Every rewrite is saved locally. Review, star, and reuse your best results anytime.</p>
+        </div>
+      </div>
+
+      <div class="offline-callout fade-up">
+        <span class="offline-icon">✈️</span>
+        <div>
+          <h3>Works Offline</h3>
+          <p>Because your AI runs on your machine, GramAI works on planes, trains, and anywhere without Wi-Fi. Grammarly goes dark. GramAI keeps going.</p>
+        </div>
+      </div>
+
+      <div class="shortcuts-callout fade-up" id="shortcuts">
+        <span class="section-label">Power users</span>
+        <h3 class="shortcuts-h">Keyboard shortcuts</h3>
+        <p class="shortcuts-sub">Professional tools ship with shortcuts. GramAI is no exception.</p>
+        <div class="shortcuts-grid">
+          <div class="shortcut-item"><kbd>Alt</kbd> + <kbd>G</kbd><span>Fix grammar on selected text</span></div>
+          <div class="shortcut-item"><kbd>Alt</kbd> + <kbd>R</kbd><span>Rewrite selected text</span></div>
+          <div class="shortcut-item"><kbd>Alt</kbd> + <kbd>S</kbd><span>Score current document</span></div>
+          <div class="shortcut-item"><kbd>Esc</kbd><span>Close toolbar / dismiss result</span></div>
         </div>
       </div>
     </div>
@@ -163,21 +257,27 @@
 
       <div class="steps">
         <div class="step fade-up">
+          <div class="step-visual">🧩</div>
           <div class="step-num">1</div>
           <h3>Install extension</h3>
-          <p>Add GramAI to Chrome, Edge, Brave, or Firefox — one click from the web store.</p>
+          <p>Add GramAI to Chrome, Edge, Brave, or Firefox — download from GitHub today.</p>
+          <span class="step-time">~20 seconds</span>
         </div>
         <div class="step-arrow">→</div>
         <div class="step fade-up">
+          <div class="step-visual">⚙️</div>
           <div class="step-num">2</div>
           <h3>Choose your mode</h3>
           <p>Free: our setup wizard installs Ollama for you. Pro: enter your license — no terminal ever.</p>
+          <span class="step-time">~5 min (Free) or instant (Pro)</span>
         </div>
         <div class="step-arrow">→</div>
         <div class="step fade-up">
+          <div class="step-visual">✨</div>
           <div class="step-num">3</div>
           <h3>Select & improve</h3>
-          <p>Highlight any text on any site. Toolbar appears. Click a tool. See the diff. Accept or discard.</p>
+          <p>Highlight any text on any site. Toolbar appears. Click a tool. See the diff. Accept or discard. Or right-click selected text for GramAI tools without the toolbar.</p>
+          <span class="step-time">Forever — on every page</span>
         </div>
       </div>
     </div>
@@ -196,20 +296,21 @@
             <tr>
               <th>Feature</th>
               <th class="col-grammarly">Grammarly</th>
-              <th class="col-gramai">GramAI</th>
+              <th class="col-gramai">GramAI <span class="col-you-badge">You</span></th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>Price</td><td>$12/month</td><td class="win">Free + $6.99/mo Pro</td></tr>
-            <tr><td>Privacy</td><td>Data uploaded to cloud</td><td class="win">100% local (free tier)</td></tr>
-            <tr><td>Setup time</td><td>30 seconds</td><td class="win">30 seconds (Pro Cloud)</td></tr>
-            <tr><td>Real-time suggestions</td><td>✅</td><td class="win">✅ Pro</td></tr>
-            <tr><td>Grammar & rewrite</td><td>✅</td><td class="win">✅</td></tr>
-            <tr><td>Summarize & explain</td><td>❌</td><td class="win">✅ Free</td></tr>
-            <tr><td>Works offline</td><td>❌</td><td class="win">✅ Free</td></tr>
-            <tr><td>Open source</td><td>❌</td><td class="win">✅ MIT</td></tr>
-            <tr><td>Custom AI prompts</td><td>❌</td><td class="win">✅ Pro</td></tr>
-            <tr><td>Team style guides</td><td>Premium only ($25/mo)</td><td class="win">$12/user Team</td></tr>
+            <tr><td>Price</td><td>$12/month</td><td class="win col-gramai-cell">Free + $6.99/mo Pro</td></tr>
+            <tr><td>Privacy</td><td class="miss">Data uploaded to cloud</td><td class="win col-gramai-cell">100% local (free tier)</td></tr>
+            <tr><td>Setup time</td><td>30 seconds</td><td class="win col-gramai-cell">30 seconds (Pro Cloud)</td></tr>
+            <tr><td>Real-time suggestions</td><td>✅</td><td class="win col-gramai-cell">✅ Pro</td></tr>
+            <tr><td>Grammar & rewrite</td><td>✅</td><td class="win col-gramai-cell">✅</td></tr>
+            <tr><td>Summarize & explain</td><td class="miss">❌</td><td class="win col-gramai-cell">✅ Free</td></tr>
+            <tr><td>Bidirectional translation</td><td class="miss">❌ English only</td><td class="win col-gramai-cell">✅ 15+ languages</td></tr>
+            <tr><td>Works offline</td><td class="miss">❌</td><td class="win col-gramai-cell">✅ Free</td></tr>
+            <tr><td>Open source</td><td class="miss">❌</td><td class="win col-gramai-cell">✅ MIT</td></tr>
+            <tr><td>Custom AI prompts</td><td class="miss">❌</td><td class="win col-gramai-cell">✅ Pro</td></tr>
+            <tr><td>Team style guides</td><td>Premium only ($25/mo)</td><td class="win col-gramai-cell">$12/user Team</td></tr>
           </tbody>
         </table>
       </div>
@@ -234,28 +335,30 @@
           <div class="price-amount" data-monthly="$0" data-annual="$0">$0</div>
           <p class="price-period">forever</p>
           <ul>
-            <li>All 9 writing tools</li>
+            <li>All 10 writing tools</li>
             <li>100% local with Ollama</li>
             <li>Floating toolbar + shortcuts</li>
             <li>History (last 20 actions)</li>
             <li>Google Docs & Word Online</li>
           </ul>
-          <a href="#cta" class="btn btn-outline">Get Started Free</a>
+          <a href="#" class="btn btn-outline install-trigger">Get Started Free</a>
         </div>
 
         <div class="price-card featured fade-up">
           <div class="popular-badge">Most Popular</div>
+          <p class="popular-sub">Most teams pick this</p>
           <h3>Pro</h3>
           <div class="price-amount" data-monthly="$6.99" data-annual="$5.59">$6.99</div>
           <p class="price-period">/month</p>
+          <p class="pro-annual-note" id="pro-annual-note">Save $16.80/year with annual</p>
           <ul>
-            <li>Cloud AI — no Ollama needed</li>
-            <li>Real-time grammar suggestions</li>
-            <li>Unlimited history</li>
-            <li>Custom prompt library</li>
-            <li>Auto-score while typing</li>
+            <li><span class="lock-icon">🔒</span> Cloud AI — no Ollama needed</li>
+            <li><span class="lock-icon">🔒</span> Real-time grammar suggestions</li>
+            <li><span class="lock-icon">🔒</span> Unlimited history</li>
+            <li><span class="lock-icon">🔒</span> Custom prompt library</li>
+            <li><span class="lock-icon">🔒</span> Auto-score while typing</li>
           </ul>
-          <a href="https://gramai.lemonsqueezy.com/checkout/pro" class="btn btn-primary" target="_blank" rel="noopener">Start Pro Trial</a>
+          <a href="https://gramai.lemonsqueezy.com/checkout/pro" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Start Pro Trial</a>
         </div>
 
         <div class="price-card fade-up">
@@ -283,26 +386,80 @@
       <p class="section-sub">In local mode, not a single character leaves your computer. Ever. That's not a promise — it's the architecture.</p>
 
       <div class="privacy-diagram fade-up">
-        <div class="pd-box">
-          <div class="pd-icon">👤</div>
-          <strong>You</strong>
-          <span>Select text in browser</span>
+        <div class="pd-flow">
+          <div class="pd-box">
+            <div class="pd-icon">👤</div>
+            <strong>You</strong>
+            <span>Select text in browser</span>
+          </div>
+          <div class="pd-arrow-wrap">
+            <div class="pd-arrow">→</div>
+            <span class="pd-encrypted">🔒 encrypted</span>
+          </div>
+          <div class="pd-box">
+            <div class="pd-icon">✨</div>
+            <strong>GramAI Extension</strong>
+            <span>Processes locally in browser</span>
+          </div>
+          <div class="pd-arrow">→</div>
+          <div class="pd-box">
+            <div class="pd-icon">🖥️</div>
+            <strong>Your Computer</strong>
+            <span>Ollama runs AI on-device</span>
+          </div>
         </div>
-        <div class="pd-arrow">→</div>
-        <div class="pd-box">
-          <div class="pd-icon">✨</div>
-          <strong>GramAI Extension</strong>
-          <span>Processes locally in Chrome</span>
-        </div>
-        <div class="pd-arrow">→</div>
-        <div class="pd-box">
-          <div class="pd-icon">🖥️</div>
-          <strong>Your Computer</strong>
-          <span>Ollama runs AI on-device</span>
+        <div class="pd-blocked">
+          <div class="pd-box pd-box-blocked">
+            <div class="pd-block-icon">🚫</div>
+            <div class="pd-icon">☁️</div>
+            <strong>Cloud Server</strong>
+            <span>Your text never goes here (local mode)</span>
+          </div>
         </div>
         <div class="pd-cloud-note">
           <span>Pro Cloud mode?</span> All requests are encrypted in transit. We never log or store your text.
+          <a href="#privacy" class="pd-policy-link">Read our full privacy policy →</a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-alt" id="faq">
+    <div class="inner">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-h">Common questions</h2>
+      <p class="section-sub">Everything skeptical writers ask before they install.</p>
+
+      <div class="faq-list fade-up">
+        <details class="faq-item">
+          <summary>Do I need an account?</summary>
+          <p>No. GramAI never asks for your email. There is no login, no signup, no account.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does it work on company/work computers?</summary>
+          <p>Yes. Local mode doesn't contact any external server, so corporate firewalls and VPNs aren't an issue.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if Ollama crashes?</summary>
+          <p>We detect this and show you a one-click restart prompt inside the extension. No data is lost.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is my Pro Cloud data stored?</summary>
+          <p>No. Requests are processed and immediately discarded. We don't log, train on, or store any user text.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How is this different from just using ChatGPT?</summary>
+          <p>GramAI is always one click away on any webpage. ChatGPT requires switching tabs, copying text, pasting, reading a long response, and copying back. GramAI does it inline in 2 seconds.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use my own AI model?</summary>
+          <p>Yes (Free/local). You choose which Ollama model runs — Llama, Qwen, Mistral, Phi, or any other.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What if I want to cancel Pro?</summary>
+          <p>One click in your account dashboard. No dark patterns, no "call to cancel."</p>
+        </details>
       </div>
     </div>
   </section>
@@ -311,9 +468,21 @@
   <section class="cta-section" id="cta">
     <div class="cta-inner">
       <h2>Write better. Stay private.</h2>
-      <p>Join thousands of writers using GramAI — free forever for local users.</p>
-      <a href="#" class="btn btn-white btn-lg" id="chrome-cta">Add to Chrome — Free</a>
-      <p class="cta-note">Also works on Edge, Brave & Firefox · No account required</p>
+      <p>Join writers using GramAI — free forever for local users.</p>
+      <a href="#" class="btn btn-white btn-lg install-trigger" id="chrome-cta">Install Extension — Free</a>
+      <div class="browser-pills">
+        <span>Chrome</span><span>Edge</span><span>Brave</span><span>Firefox</span><span>Opera</span>
+      </div>
+      <p class="cta-note">No account required · 100% open source</p>
+
+      <div class="waitlist-box fade-up">
+        <p class="waitlist-label">Be first to know when GramAI hits the Chrome Web Store</p>
+        <form class="waitlist-form" id="waitlist-form">
+          <input type="email" name="email" placeholder="you@email.com" required aria-label="Email address">
+          <button type="submit" class="btn btn-white btn-sm">Notify me</button>
+        </form>
+        <p class="waitlist-success is-hidden" id="waitlist-success">You're on the list! We'll email you at launch.</p>
+      </div>
     </div>
   </section>
 
@@ -325,14 +494,35 @@
         <p class="footer-license">MIT License · Open source</p>
       </div>
       <div class="footer-links">
-        <a href="https://github.com/TRUSHAKHACHARIYA/gramai-extension" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/TRUSHAKHACHARIYA/gramai-extension" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="#privacy">Privacy</a>
         <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
         <a href="mailto:support@gramai.app">Support</a>
       </div>
       <p class="footer-copy">© 2026 GramAI · Not affiliated with Grammarly.</p>
     </div>
   </footer>
+
+  <!-- Install modal -->
+  <dialog class="install-modal" id="install-modal">
+    <div class="install-modal-inner">
+      <button class="install-modal-close" type="button" id="install-modal-close" aria-label="Close">×</button>
+      <h3>Install GramAI</h3>
+      <p>GramAI isn't on the Chrome Web Store yet. Install from GitHub in under a minute:</p>
+      <ol class="install-steps">
+        <li>Download or clone the repo from GitHub</li>
+        <li>Open <code>chrome://extensions</code> (or your browser's extensions page)</li>
+        <li>Enable <strong>Developer mode</strong></li>
+        <li>Click <strong>Load unpacked</strong> and select the <code>extension/</code> folder</li>
+      </ol>
+      <div class="install-modal-actions">
+        <a href="https://github.com/TRUSHAKHACHARIYA/gramai-extension" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Open on GitHub</a>
+        <a href="https://github.com/TRUSHAKHACHARIYA/gramai-extension/archive/refs/heads/master.zip" class="btn btn-outline" target="_blank" rel="noopener noreferrer">Download ZIP</a>
+      </div>
+      <p class="install-modal-note">Works on Chrome, Edge, Brave, Firefox & Opera</p>
+    </div>
+  </dialog>
 
   <script src="script.js"></script>
 </body>
