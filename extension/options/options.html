@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GramAI — Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8fafc; --card: #fff; --border: #e5e7eb; --border-light: #f1f5f9;
+      --text: #111827; --text-secondary: #374151; --text-muted: #6b7280; --text-faint: #9ca3af;
+      --primary: #6366f1;
+    }
+    body.dark {
+      --bg: #13131f; --card: #1e1e2e; --border: #3f3f5c; --border-light: #35354a;
+      --text: #e2e8f0; --text-secondary: #cbd5e1; --text-muted: #94a3b8; --text-faint: #64748b;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 20px;
+    }
+    .container { max-width: 580px; margin: 0 auto; }
+    .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+    .page-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--text); }
+    .page-sub { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+    .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border-light); }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .card-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; }
+    select, input[type="text"], input[type="url"], input[type="number"] {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; color: var(--text); background: var(--bg); font-family: inherit; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--primary); }
+    .hint { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
+    .status-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg); border-radius: 8px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: #10b981; } .dot-red { background: #ef4444; } .dot-gray { background: #d1d5db; }
+    .status-text { font-size: 12px; color: var(--text-secondary); flex: 1; }
+    .btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; border: none; transition: all 0.12s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-secondary { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border-light); }
+    .btn-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .models-list { display: flex; flex-direction: column; gap: 6px; }
+    .model-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg); border-radius: 7px; }
+    .model-name { font-size: 13px; color: var(--text); flex: 1; font-family: monospace; }
+    .model-select-btn { padding: 4px 10px; font-size: 11px; border: 1px solid var(--primary); border-radius: 5px; background: none; color: var(--primary); cursor: pointer; font-family: inherit; }
+    .model-select-btn.active { background: var(--primary); color: white; }
+    .save-toast { display: none; position: fixed; bottom: 20px; right: 20px; background: #059669; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+    .feature-list { display: flex; flex-direction: column; gap: 6px; }
+    .feature-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+    .feature-label { flex: 1; font-size: 13px; color: var(--text-secondary); }
+    .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--primary); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+    .slider-row { display: flex; align-items: center; gap: 12px; }
+    .slider-row input[type="range"] { flex: 1; }
+    .slider-val { font-size: 13px; color: var(--primary); font-weight: 600; min-width: 24px; }
+    .shortcut-list { display: flex; flex-direction: column; gap: 8px; }
+    .shortcut-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-secondary); }
+    .tier-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .tier-free { background: #f3f4f6; color: #6b7280; }
+    .tier-pro { background: #eef2ff; color: #4338ca; }
+    .tier-team { background: #fef3c7; color: #92400e; }
+    .prompt-list, .guide-list { display: flex; flex-direction: column; gap: 8px; }
+    .prompt-row, .guide-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg); border-radius: 7px; font-size: 13px; }
+    .prompt-row span, .guide-row span { flex: 1; }
+    .upgrade-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .upgrade-links a { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; text-decoration: none; }
+    .link-pro { background: #eef2ff; color: #4338ca; }
+    .link-team { background: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="page-header">
+      <div class="page-logo">✨</div>
+      <div>
+        <div class="page-title">GramAI Settings</div>
+        <div class="page-sub">Free locally · Pro Cloud · Team for businesses</div>
+      </div>
+      <span class="tier-badge tier-free" id="tier-badge">Free</span>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💳 Subscription & License</div>
+        <div class="card-sub">Activate Pro or Team to unlock cloud AI, style guides, and API access</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label>License key</label>
+          <input type="text" id="license-key" placeholder="GRAMAI-PRO-XXXX or GRAMAI-TEAM-XXXX">
+          <div class="hint">Demo keys: GRAMAI-PRO-DEMO-2026 · GRAMAI-TEAM-DEMO-2026</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="activate-license-btn">Activate License</button>
+          <button class="btn btn-secondary" id="deactivate-license-btn">Deactivate</button>
+        </div>
+        <div class="status-row">
+          <div class="status-dot dot-gray" id="license-dot"></div>
+          <span class="status-text" id="license-status">No license activated</span>
+        </div>
+        <div class="upgrade-links">
+          <a href="https://gramai.lemonsqueezy.com/checkout/pro" target="_blank" class="link-pro">Upgrade to Pro — $6.99/mo</a>
+          <a href="https://gramai.lemonsqueezy.com/checkout/team" target="_blank" class="link-team">Upgrade to Team — $12/user/mo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">☁️ AI Mode</div>
+        <div class="card-sub">Local uses Ollama on your computer. Cloud uses GramAI servers (Pro/Team).</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label>Processing mode</label>
+          <select id="ai-mode">
+            <option value="local">Local only (Ollama)</option>
+            <option value="auto">Auto (Cloud if licensed, else local)</option>
+            <option value="cloud">Cloud only (Pro/Team)</option>
+          </select>
+        </div>
+        <div>
+          <label>Cloud API URL</label>
+          <input type="url" id="cloud-url" value="http://localhost:3847" placeholder="http://localhost:3847">
+          <div class="hint">Run the included cloud-server for self-hosted Pro/Team</div>
+        </div>
+        <div class="status-row">
+          <div class="status-dot dot-gray" id="cloud-dot"></div>
+          <span class="status-text" id="cloud-status">Click "Test Cloud" to check</span>
+          <button class="btn btn-secondary" id="test-cloud-btn">Test Cloud</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔌 Ollama Connection</div>
+        <div class="card-sub">GramAI uses Ollama to run AI models on your computer</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label>Ollama server URL</label>
+          <input type="url" id="ollama-url" value="http://localhost:11434" placeholder="http://localhost:11434">
+          <div class="hint">Default is http://localhost:11434 — change only if you use a remote Ollama server</div>
+        </div>
+        <div class="status-row">
+          <div class="status-dot dot-gray" id="conn-dot"></div>
+          <span class="status-text" id="conn-status">Click "Test" to check the connection</span>
+          <button class="btn btn-secondary" id="test-btn">Test</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🤖 AI Model</div>
+        <div class="card-sub">Choose which model to use. Smaller models are faster; larger ones give better results.</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label>Active model</label>
+          <select id="model-select">
+            <option value="">Auto-detect (recommended)</option>
+          </select>
+        </div>
+        <div>
+          <label>Installed models</label>
+          <div class="models-list" id="models-list">
+            <div style="font-size:12px;color:var(--text-faint);">Click "Test" above to load your models</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⚙️ Features</div>
+      </div>
+      <div class="card-body">
+        <div class="feature-list">
+          <div class="feature-row">
+            <span class="feature-label">Show floating toolbar on text selection</span>
+            <label class="toggle"><input type="checkbox" id="feat-toolbar" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="feature-row">
+            <span class="feature-label">Show right-click context menu</span>
+            <label class="toggle"><input type="checkbox" id="feat-contextmenu" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="feature-row">
+            <span class="feature-label">Real-time grammar suggestions while typing</span>
+            <label class="toggle"><input type="checkbox" id="feat-realtime" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="feature-row">
+            <span class="feature-label">Auto-score while typing</span>
+            <label class="toggle"><input type="checkbox" id="feat-autoscore"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="feature-row">
+            <span class="feature-label">Auto-copy result to clipboard</span>
+            <label class="toggle"><input type="checkbox" id="feat-autocopy"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="feature-row">
+            <span class="feature-label">Save action history</span>
+            <label class="toggle"><input type="checkbox" id="feat-history" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div>
+          <label>Minimum selection length for toolbar</label>
+          <div class="slider-row">
+            <input type="range" id="feat-min-selection" min="1" max="50" value="3">
+            <span class="slider-val" id="min-sel-val">3</span>
+          </div>
+          <div class="hint">Characters needed before the toolbar appears</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎨 Appearance</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label>Theme</label>
+          <select id="dark-mode">
+            <option value="auto">System default</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⌨️ Keyboard Shortcuts</div>
+        <div class="card-sub">Customize at chrome://extensions/shortcuts</div>
+      </div>
+      <div class="card-body">
+        <div class="shortcut-list">
+          <div class="shortcut-row"><span>Fix grammar</span><kbd>Alt+G</kbd></div>
+          <div class="shortcut-row"><span>Rewrite text</span><kbd>Alt+R</kbd></div>
+          <div class="shortcut-row"><span>Score writing</span><kbd>Alt+S</kbd></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎯 Custom Prompt Library</div>
+        <div class="card-sub">Pro feature — save and reuse custom writing instructions</div>
+      </div>
+      <div class="card-body">
+        <div class="btn-row" style="margin-bottom:12px;">
+          <input type="text" id="new-prompt-name" placeholder="Prompt name" style="flex:1;">
+          <input type="text" id="new-prompt-text" placeholder="e.g. Make this sound like Hemingway" style="flex:2;">
+          <button class="btn btn-primary" id="add-prompt-btn">Add</button>
+        </div>
+        <div class="prompt-list" id="prompt-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📐 Team Style Guides</div>
+        <div class="card-sub">Team feature — shared writing rules applied to all AI actions</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label>Active style guide</label>
+          <select id="active-style-guide"><option value="">None</option></select>
+        </div>
+        <div class="btn-row" style="margin:12px 0;">
+          <button class="btn btn-secondary" id="open-dashboard-btn">🏢 Open Admin Dashboard</button>
+          <button class="btn btn-secondary" id="sync-guides-btn">↻ Sync from Cloud</button>
+        </div>
+        <div class="guide-list" id="guide-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 History</div>
+      </div>
+      <div class="card-body">
+        <button class="btn btn-danger" id="clear-history-btn">Clear all history</button>
+        <div class="hint">Removes all saved actions from the History tab</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="save-btn">Save settings</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset to defaults</button>
+    </div>
+
+  </div>
+
+  <div class="save-toast" id="save-toast">✅ Settings saved!</div>
+
+  <script src="options.js"></script>
+</body>
+</html>

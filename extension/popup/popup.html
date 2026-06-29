@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GramAI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">✨</div>
+        <span class="logo-text">GramAI</span>
+        <span class="logo-sub">Free AI Writing</span>
+        <span class="tier-pill" id="tier-pill">FREE</span>
+      </div>
+      <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">⚙️</button>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="write">Write</button>
+      <button class="tab-btn" data-tab="prompts">Prompts</button>
+      <button class="tab-btn" data-tab="history">History</button>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="status-bar">
+      <div class="status-indicator" id="status-dot"></div>
+      <span id="status-text">Checking Ollama…</span>
+      <span class="status-model" id="status-model"></span>
+    </div>
+
+    <!-- Loading Skeleton (initial check) -->
+    <div class="skeleton-wrap" id="skeleton-wrap">
+      <div class="skeleton skeleton-bar"></div>
+      <div class="skeleton skeleton-textarea"></div>
+      <div class="skeleton skeleton-grid">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </div>
+
+    <!-- Setup Wizard (offline / first run) -->
+    <div class="setup-wizard" id="setup-wizard" style="display:none;">
+      <div class="wizard-header">
+        <div class="wizard-title">🚀 Get started with GramAI</div>
+        <div class="wizard-sub">Set up Ollama in a few minutes — then it's free forever</div>
+      </div>
+      <div class="wizard-progress">
+        <div class="wizard-step active" data-step="1">
+          <div class="wizard-step-num">1</div>
+          <div class="wizard-step-label">Install</div>
+        </div>
+        <div class="wizard-connector"></div>
+        <div class="wizard-step" data-step="2">
+          <div class="wizard-step-num">2</div>
+          <div class="wizard-step-label">Start</div>
+        </div>
+        <div class="wizard-connector"></div>
+        <div class="wizard-step" data-step="3">
+          <div class="wizard-step-num">3</div>
+          <div class="wizard-step-label">Model</div>
+        </div>
+        <div class="wizard-connector"></div>
+        <div class="wizard-step" data-step="4">
+          <div class="wizard-step-num">4</div>
+          <div class="wizard-step-label">Ready</div>
+        </div>
+      </div>
+      <div class="wizard-body" id="wizard-body">
+        <div class="wizard-panel" id="wizard-panel-1">
+          <p>Download and install Ollama — the free local AI runtime.</p>
+          <a href="https://ollama.com/download" target="_blank" class="wizard-link-btn">⬇️ Download Ollama</a>
+          <p class="wizard-hint">Works on Windows, Mac, and Linux. Takes about 2 minutes.</p>
+        </div>
+        <div class="wizard-panel" id="wizard-panel-2" style="display:none;">
+          <p>Open a terminal (or Command Prompt on Windows) and run:</p>
+          <div class="wizard-code-block"><code>ollama serve</code><button class="copy-code-btn" data-copy="ollama serve">Copy</button></div>
+          <p class="wizard-hint">On Mac, Ollama usually starts automatically after install.</p>
+        </div>
+        <div class="wizard-panel" id="wizard-panel-3" style="display:none;">
+          <p>Pull a recommended AI model:</p>
+          <div class="wizard-code-block"><code>ollama pull llama3.2</code><button class="copy-code-btn" data-copy="ollama pull llama3.2">Copy</button></div>
+          <p class="wizard-hint">This downloads ~2GB. Only needed once.</p>
+        </div>
+        <div class="wizard-panel" id="wizard-panel-4" style="display:none;">
+          <p>Click below to verify everything is working.</p>
+          <button class="retry-btn" id="wizard-test-btn">✓ Test connection</button>
+          <p class="wizard-hint" id="wizard-test-result"></p>
+        </div>
+      </div>
+      <div class="wizard-nav">
+        <button class="wizard-nav-btn" id="wizard-prev" disabled>← Back</button>
+        <button class="wizard-nav-btn wizard-nav-primary" id="wizard-next">Next →</button>
+      </div>
+    </div>
+
+    <!-- Write Tab -->
+    <div class="tab-content active" id="tab-write">
+
+      <div id="main-panel" style="display:none;">
+
+        <div class="section">
+          <label class="section-label" for="main-input">Your text</label>
+          <textarea
+            id="main-input"
+            class="main-textarea"
+            placeholder="Type or paste text here…&#10;&#10;Or select text on any webpage for the quick toolbar!"
+            rows="5"
+            maxlength="3000"
+          ></textarea>
+          <div class="char-count"><span id="char-count">0</span> / 3000</div>
+        </div>
+
+        <div class="section">
+          <div class="section-label">Choose a tool</div>
+          <div class="tools-grid">
+            <button class="tool-card selected" data-tool="grammar">
+              <span class="tool-emoji">✅</span>
+              <span class="tool-name">Grammar</span>
+            </button>
+            <button class="tool-card" data-tool="rewrite">
+              <span class="tool-emoji">✍️</span>
+              <span class="tool-name">Rewrite</span>
+            </button>
+            <button class="tool-card" data-tool="score">
+              <span class="tool-emoji">📊</span>
+              <span class="tool-name">Score</span>
+            </button>
+            <button class="tool-card" data-tool="tone-pro">
+              <span class="tool-emoji">👔</span>
+              <span class="tool-name">Professional</span>
+            </button>
+            <button class="tool-card" data-tool="tone-friendly">
+              <span class="tool-emoji">😊</span>
+              <span class="tool-name">Friendly</span>
+            </button>
+            <button class="tool-card" data-tool="shorter">
+              <span class="tool-emoji">✂️</span>
+              <span class="tool-name">Shorter</span>
+            </button>
+            <button class="tool-card" data-tool="summarize">
+              <span class="tool-emoji">📋</span>
+              <span class="tool-name">Summarize</span>
+            </button>
+            <button class="tool-card" data-tool="explain">
+              <span class="tool-emoji">💡</span>
+              <span class="tool-name">Explain</span>
+            </button>
+            <button class="tool-card" data-tool="translate">
+              <span class="tool-emoji">🌐</span>
+              <span class="tool-name">Translate</span>
+            </button>
+            <button class="tool-card" data-tool="custom">
+              <span class="tool-emoji">🎯</span>
+              <span class="tool-name">Custom</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Translate language selector -->
+        <div class="section" id="translate-section" style="display:none;">
+          <label class="section-label" for="translate-lang">Translate to</label>
+          <select id="translate-lang" class="lang-select"></select>
+        </div>
+
+        <!-- Custom prompt input -->
+        <div class="section" id="custom-section" style="display:none;">
+          <label class="section-label" for="custom-prompt">Your instruction</label>
+          <input type="text" id="custom-prompt" class="custom-input" placeholder="e.g. Make this sound like Hemingway">
+        </div>
+
+        <button class="run-btn" id="run-btn" disabled>
+          <span id="run-btn-icon">✨</span>
+          <span id="run-btn-text">Select a tool above</span>
+        </button>
+
+        <div class="result-section" id="result-section" style="display:none;">
+          <div class="result-header">
+            <span class="result-title" id="result-title">Result</span>
+            <button class="result-close" id="result-close" aria-label="Close result">×</button>
+          </div>
+          <div class="result-body" id="result-body"></div>
+          <div class="result-actions" id="result-actions"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Prompts Tab -->
+    <div class="tab-content" id="tab-prompts">
+      <div class="prompts-header">
+        <span class="section-label">Saved prompts</span>
+        <span class="pro-tag" id="prompts-pro-tag">Pro</span>
+      </div>
+      <div class="prompts-list" id="prompts-list">
+        <div class="history-empty">No saved prompts yet.</div>
+      </div>
+      <div class="prompt-add" id="prompt-add-form">
+        <input type="text" id="popup-prompt-name" class="prompt-input" placeholder="Name">
+        <input type="text" id="popup-prompt-text" class="prompt-input" placeholder="Instruction…">
+        <button class="run-btn" id="save-prompt-btn" style="margin-top:8px;">Save Prompt</button>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="tab-content" id="tab-history">
+      <div class="history-header">
+        <span class="section-label">Recent actions</span>
+        <button class="history-clear-btn" id="history-clear-btn">Clear all</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="history-empty">No history yet. Run a tool to see results here.</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>100% local · <a href="#" id="upgrade-link">Upgrade to Pro</a></span>
+      <a href="#" id="open-options">Options</a>
+    </div>
+
+  </div>
+  <script src="../lib/diff.js"></script>
+  <script src="../lib/languages.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

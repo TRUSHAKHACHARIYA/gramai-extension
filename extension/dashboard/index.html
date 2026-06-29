@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GramAI Admin Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">✨</span>
+        <span>GramAI</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="overview">Overview</button>
+        <button class="nav-item" data-view="style-guides">Style Guides</button>
+        <button class="nav-item" data-view="team">Team</button>
+        <button class="nav-item" data-view="api">Developer API</button>
+        <button class="nav-item" data-view="billing">Billing</button>
+      </nav>
+      <div class="sidebar-tier" id="sidebar-tier">Free</div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <h1 id="view-title">Overview</h1>
+        <div class="header-actions">
+          <input type="text" id="cloud-url" class="cloud-input" placeholder="Cloud API URL" value="http://localhost:3847">
+          <input type="text" id="license-key" class="license-input" placeholder="License key">
+          <button class="btn btn-primary" id="connect-btn">Connect</button>
+        </div>
+      </header>
+
+      <!-- Login gate -->
+      <div class="login-gate" id="login-gate">
+        <div class="login-card">
+          <h2>Team Admin Dashboard</h2>
+          <p>Enter your Team license key and Cloud API URL to manage style guides, team members, and API keys.</p>
+          <p class="demo-hint">Demo key: <code>GRAMAI-TEAM-DEMO-2026</code></p>
+        </div>
+      </div>
+
+      <!-- Overview -->
+      <section class="view active" id="view-overview">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-requests">—</div><div class="stat-lbl">API Requests</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-tokens">—</div><div class="stat-lbl">Tokens Used</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-members">—</div><div class="stat-lbl">Team Members</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-guides">—</div><div class="stat-lbl">Style Guides</div></div>
+        </div>
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="sync-guides-btn">↻ Sync Style Guides to Extension</button>
+            <button class="btn btn-secondary" id="open-options-btn">⚙️ Extension Settings</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Style Guides -->
+      <section class="view" id="view-style-guides">
+        <div class="view-toolbar">
+          <button class="btn btn-primary" id="new-guide-btn">+ New Style Guide</button>
+        </div>
+        <div class="guides-list" id="guides-list"></div>
+        <div class="guide-editor" id="guide-editor" style="display:none;">
+          <h3 id="editor-title">Edit Style Guide</h3>
+          <label>Name<input type="text" id="guide-name"></label>
+          <label>Writing Rules<textarea id="guide-rules" rows="4" placeholder="e.g. Use active voice. Keep sentences under 25 words."></textarea></label>
+          <label>Prefer Words (comma-separated)<input type="text" id="guide-prefer" placeholder="streamline, enhance, improve"></label>
+          <label>Avoid Words (comma-separated)<input type="text" id="guide-avoid" placeholder="leverage, synergy, utilize"></label>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="save-guide-btn">Save Guide</button>
+            <button class="btn btn-secondary" id="cancel-guide-btn">Cancel</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Team -->
+      <section class="view" id="view-team">
+        <div class="card">
+          <h3>Team Members</h3>
+          <div class="members-list" id="members-list"></div>
+        </div>
+      </section>
+
+      <!-- API -->
+      <section class="view" id="view-api">
+        <div class="card">
+          <h3>Developer API</h3>
+          <p class="hint">Generate API keys for programmatic access to GramAI. Team license required.</p>
+          <div class="api-docs">
+            <h4>Endpoints</h4>
+            <pre>POST /v1/generate
+Headers: X-API-Key: your_key
+Body: { "action": "grammar", "text": "..." }</pre>
+          </div>
+          <button class="btn btn-primary" id="gen-api-key-btn">Generate API Key</button>
+          <div id="api-key-result" class="api-key-result"></div>
+          <div class="api-keys-list" id="api-keys-list"></div>
+        </div>
+      </section>
+
+      <!-- Billing -->
+      <section class="view" id="view-billing">
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Pro</h3>
+            <div class="price">$6.99<span>/mo</span></div>
+            <ul>
+              <li>Cloud AI (no Ollama)</li>
+              <li>Real-time suggestions</li>
+              <li>Unlimited history</li>
+              <li>Custom prompt library</li>
+            </ul>
+            <a href="https://gramai.lemonsqueezy.com/checkout/pro" target="_blank" class="btn btn-primary">Upgrade to Pro</a>
+          </div>
+          <div class="pricing-card featured">
+            <h3>Team</h3>
+            <div class="price">$12<span>/user/mo</span></div>
+            <ul>
+              <li>Everything in Pro</li>
+              <li>Shared style guides</li>
+              <li>Team vocabulary</li>
+              <li>Admin dashboard</li>
+              <li>Developer API access</li>
+            </ul>
+            <a href="https://gramai.lemonsqueezy.com/checkout/team" target="_blank" class="btn btn-primary">Upgrade to Team</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html>

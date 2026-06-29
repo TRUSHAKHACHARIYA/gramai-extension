@@ -1,0 +1,92 @@
+{
+  "manifest_version": 3,
+  "name": "GramAI - AI Writing Assistant",
+  "version": "2.0.0",
+  "description": "AI-powered grammar, rewrite, tone & more — free locally with Ollama, or Pro Cloud with no setup required.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab",
+    "scripting",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://localhost:11434/*",
+    "http://127.0.0.1:11434/*",
+    "http://localhost:3847/*",
+    "https://*/*",
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "GramAI"
+  },
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["lib/diff.js", "content/content.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://docs.google.com/document/*"],
+      "js": ["content/docs.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.office.com/*",
+        "https://*.officeapps.live.com/*",
+        "https://*.sharepoint.com/*",
+        "https://onedrive.live.com/*"
+      ],
+      "js": ["content/word.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "fix-grammar": {
+      "suggested_key": { "default": "Alt+G", "mac": "Alt+G" },
+      "description": "Fix grammar on selected text"
+    },
+    "rewrite-text": {
+      "suggested_key": { "default": "Alt+R", "mac": "Alt+R" },
+      "description": "Rewrite selected text"
+    },
+    "score-text": {
+      "suggested_key": { "default": "Alt+S", "mac": "Alt+S" },
+      "description": "Score writing quality"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/content.css", "dashboard/index.html", "dashboard/dashboard.css", "dashboard/dashboard.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "gramai@extension.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}
