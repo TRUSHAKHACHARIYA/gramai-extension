@@ -1,34 +1,36 @@
 /**
  * GramAI Cloud Server v2.0
- * Deploy this for Pro Cloud mode, license validation, team style guides, and developer API.
+ * Deploy for Pro Cloud mode, license validation, waitlist, team style guides, and API.
  *
  * Start: npm install && npm start
- * Default: http://localhost:3847
- *
- * Demo license keys:
- *   GRAMAI-PRO-DEMO-2026
- *   GRAMAI-TEAM-DEMO-2026
+ * Deploy: see render.yaml, Dockerfile, or cloud-server/README.md
  */
 
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const path = require('path');
+const { loadJson, saveJson } = require('./lib/store');
+const {
+  loadLicenses,
+  saveLicenses,
+  generateLicenseKey,
+  activateLicense,
+} = require('./lib/licenses');
 
 const PORT = process.env.PORT || 3847;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const LEMONSQUEEZY_WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET || '';
+const LEMONSQUEEZY_PRO_VARIANT_ID = process.env.LEMONSQUEEZY_PRO_VARIANT_ID || '';
+const LEMONSQUEEZY_TEAM_VARIANT_ID = process.env.LEMONSQUEEZY_TEAM_VARIANT_ID || '';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || '';
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
-// ─── In-memory store (use PostgreSQL in production) ───────────────────────────
-
-const LICENSES = {
-  'GRAMAI-PRO-DEMO-2026': { tier: 'pro', email: 'demo@gramai.local', teamId: null },
-  'GRAMAI-TEAM-DEMO-2026': { tier: 'team', email: 'admin@gramai.local', teamId: 'team-demo-001', role: 'admin' },
-};
+let LICENSES = loadLicenses();
 
 const TEAMS = {
   'team-demo-001': {
@@ -67,6 +69,34 @@ function authMiddleware(req, res, next) {
   return res.status(401).json({ error: 'Invalid or missing license/API key' });
 }
 
+function adminAuth(req, res, next) {
+  if (!ADMIN_SECRET) return res.status(503).json({ error: 'Admin API not configured' });
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+function verifyLemonSqueezySignature(req) {
+  if (!LEMONSQUEEZY_WEBHOOK_SECRET) return true;
+  const signature = req.headers['x-signature'];
+  if (!signature) return false;
+  const digest = crypto
+    .createHmac('sha256', LEMONSQUEEZY_WEBHOOK_SECRET)
+    .update(JSON.stringify(req.body))
+    .digest('hex');
+  return signature === digest;
+}
+
+function tierFromVariant(variantId, variantName) {
+  const id = String(variantId || '');
+  const name = String(variantName || '').toLowerCase();
+  if (LEMONSQUEEZY_TEAM_VARIANT_ID && id === LEMONSQUEEZY_TEAM_VARIANT_ID) return 'team';
+  if (LEMONSQUEEZY_PRO_VARIANT_ID && id === LEMONSQUEEZY_PRO_VARIANT_ID) return 'pro';
+  if (name.includes('team')) return 'team';
+  return 'pro';
+}
+
 // ─── Health ───────────────────────────────────────────────────────────────────
 
 app.get('/v1/health', async (req, res) => {
@@ -81,7 +111,36 @@ app.get('/v1/health', async (req, res) => {
     ollama,
     openai: !!OPENAI_API_KEY,
     provider: OPENAI_API_KEY ? 'openai' : ollama ? 'ollama' : 'none',
+    licenses: Object.keys(LICENSES).length,
+    waitlist: loadJson('waitlist.json', []).length,
   });
+});
+
+// ─── Waitlist ─────────────────────────────────────────────────────────────────
+
+app.post('/v1/waitlist', (req, res) => {
+  const email = (req.body.email || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  const waitlist = loadJson('waitlist.json', []);
+  const exists = waitlist.some(entry => entry.email === email);
+  if (!exists) {
+    waitlist.push({ email, addedAt: new Date().toISOString(), source: req.body.source || 'landing' });
+    saveJson('waitlist.json', waitlist);
+  }
+
+  res.json({ ok: true, count: waitlist.length });
+});
+
+app.get('/v1/waitlist/count', (req, res) => {
+  const waitlist = loadJson('waitlist.json', []);
+  res.json({ count: waitlist.length });
+});
+
+app.get('/v1/waitlist', adminAuth, (req, res) => {
+  res.json({ waitlist: loadJson('waitlist.json', []) });
 });
 
 // ─── License ──────────────────────────────────────────────────────────────────
@@ -100,18 +159,68 @@ app.post('/v1/license/validate', (req, res) => {
   });
 });
 
-// LemonSqueezy webhook placeholder — activate license on purchase
-app.post('/v1/webhooks/lemonsqueezy', (req, res) => {
-  const { license_key, email, variant } = req.body || {};
-  if (license_key) {
-    const tier = (variant || '').includes('team') ? 'team' : 'pro';
-    const teamId = tier === 'team' ? `team-${crypto.randomBytes(4).toString('hex')}` : null;
-    LICENSES[license_key.toUpperCase()] = { tier, email, teamId, role: tier === 'team' ? 'admin' : undefined };
-    if (teamId) {
-      TEAMS[teamId] = { name: `${email}'s Team`, members: [{ email, role: 'admin' }], styleGuides: [], usage: { requests: 0, tokens: 0 } };
-    }
+app.post('/v1/license/generate', adminAuth, (req, res) => {
+  const tier = req.body.tier === 'team' ? 'team' : 'pro';
+  const email = (req.body.email || 'user@gramai.local').trim();
+  const key = generateLicenseKey(tier);
+  let teamId = null;
+  if (tier === 'team') {
+    teamId = `team-${crypto.randomBytes(4).toString('hex')}`;
+    TEAMS[teamId] = {
+      name: `${email}'s Team`,
+      members: [{ email, role: 'admin' }],
+      styleGuides: [],
+      usage: { requests: 0, tokens: 0 },
+    };
   }
-  res.json({ received: true });
+  activateLicense(LICENSES, { key, tier, email, teamId, role: tier === 'team' ? 'admin' : undefined });
+  LICENSES = loadLicenses();
+  res.json({ licenseKey: key, tier, email, teamId });
+});
+
+app.post('/v1/webhooks/lemonsqueezy', (req, res) => {
+  if (!verifyLemonSqueezySignature(req)) {
+    return res.status(401).json({ error: 'Invalid webhook signature' });
+  }
+
+  const body = req.body || {};
+  const eventName = body.meta?.event_name || body.event_name || '';
+
+  if (eventName && !['order_created', 'subscription_created', 'license_key_created'].includes(eventName)) {
+    return res.json({ received: true, skipped: true });
+  }
+
+  const attrs = body.data?.attributes || body.attributes || body;
+  const email = attrs.user_email || attrs.customer_email || body.email || 'customer@gramai.local';
+  const variantId = attrs.variant_id || attrs.first_order_item?.variant_id || body.variant;
+  const variantName = attrs.variant_name || attrs.product_name || body.variant || '';
+  const existingKey = attrs.license_key?.key || body.license_key;
+
+  const tier = tierFromVariant(variantId, variantName);
+  const licenseKey = (existingKey || generateLicenseKey(tier)).toUpperCase();
+  let teamId = null;
+
+  if (tier === 'team') {
+    teamId = `team-${crypto.randomBytes(4).toString('hex')}`;
+    TEAMS[teamId] = {
+      name: `${email}'s Team`,
+      members: [{ email, role: 'admin' }],
+      styleGuides: [],
+      usage: { requests: 0, tokens: 0 },
+    };
+  }
+
+  activateLicense(LICENSES, {
+    key: licenseKey,
+    tier,
+    email,
+    teamId,
+    role: tier === 'team' ? 'admin' : undefined,
+  });
+  LICENSES = loadLicenses();
+
+  console.log(`License activated: ${licenseKey} (${tier}) for ${email}`);
+  res.json({ received: true, licenseKey, tier });
 });
 
 // ─── AI Generate ──────────────────────────────────────────────────────────────
@@ -240,8 +349,6 @@ app.get('/v1/api-keys', authMiddleware, (req, res) => {
   res.json({ keys });
 });
 
-// ─── Dashboard data endpoint ──────────────────────────────────────────────────
-
 app.get('/v1/dashboard', authMiddleware, (req, res) => {
   const teamId = req.auth.teamId;
   const team = teamId ? TEAMS[teamId] : null;
@@ -252,10 +359,10 @@ app.get('/v1/dashboard', authMiddleware, (req, res) => {
   });
 });
 
-// Landing page (serve after API routes)
 app.use(express.static(path.join(__dirname, '..', 'landing')));
 
 app.listen(PORT, () => {
   console.log(`GramAI Cloud Server running on http://localhost:${PORT}`);
-  console.log(`Demo keys: GRAMAI-PRO-DEMO-2026, GRAMAI-TEAM-DEMO-2026`);
+  console.log('Demo keys: GRAMAI-PRO-DEMO-2026, GRAMAI-TEAM-DEMO-2026');
+  console.log(`Licenses loaded: ${Object.keys(LICENSES).length}`);
 });

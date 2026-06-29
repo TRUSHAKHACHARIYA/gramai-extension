@@ -8,13 +8,13 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>✨</text></svg>">
   <meta property="og:title" content="GramAI — AI Writing Assistant That Never Reads Your Writing">
   <meta property="og:description" content="Free AI grammar, rewrite & tone tools. 100% local. 42% cheaper than Grammarly.">
-  <meta property="og:image" content="https://gramai-extension.vercel.app/og-image.svg">
+  <meta property="og:image" content="https://gramai-extension.vercel.app/og-image.png">
   <meta property="og:url" content="https://gramai-extension.vercel.app/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GramAI — AI Writing Assistant That Never Reads Your Writing">
   <meta name="twitter:description" content="Free AI grammar, rewrite & tone tools. 100% local. 42% cheaper than Grammarly.">
-  <meta name="twitter:image" content="https://gramai-extension.vercel.app/og-image.svg">
+  <meta name="twitter:image" content="https://gramai-extension.vercel.app/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -23,6 +23,11 @@
   <script defer data-domain="gramai-extension.vercel.app" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
+
+  <div class="early-access-banner" id="early-access-banner">
+    <span id="early-access-text">🔥 Early access — Pro features free until official launch</span>
+    <span class="early-access-count" id="install-count"></span>
+  </div>
 
   <!-- Nav -->
   <nav class="nav">
@@ -143,7 +148,7 @@
     <div class="inner">
       <span class="section-label">Features</span>
       <h2 class="section-h">Everything you need to write better</h2>
-      <p class="section-sub">10 AI tools on every webpage — select any text and a toolbar appears instantly.</p>
+      <p class="section-sub">11 AI tools on every webpage — select any text and a toolbar appears instantly.</p>
 
       <div class="works-everywhere fade-up">
         <p class="works-label">Works everywhere you write</p>
@@ -178,6 +183,12 @@
           <span class="fc-icon">📊</span>
           <h3>Writing Score</h3>
           <p>0–100 quality score with Grammar, Clarity & Style sub-scores. Scores stay consistent week to week.</p>
+        </div>
+        <div class="feature-card tier-free fade-up">
+          <span class="fc-badge badge-free">Free</span>
+          <span class="fc-icon">📋</span>
+          <h3>Summarize</h3>
+          <p>Condense long emails, articles, or documents into 2–3 clear sentences in one click.</p>
         </div>
         <div class="feature-card tier-free fade-up">
           <span class="fc-badge badge-free">Free</span>
@@ -335,7 +346,7 @@
           <div class="price-amount" data-monthly="$0" data-annual="$0">$0</div>
           <p class="price-period">forever</p>
           <ul>
-            <li>All 10 writing tools</li>
+            <li>All 11 writing tools</li>
             <li>100% local with Ollama</li>
             <li>Floating toolbar + shortcuts</li>
             <li>History (last 20 actions)</li>
@@ -418,7 +429,7 @@
         </div>
         <div class="pd-cloud-note">
           <span>Pro Cloud mode?</span> All requests are encrypted in transit. We never log or store your text.
-          <a href="#privacy" class="pd-policy-link">Read our full privacy policy →</a>
+          <a href="privacy.html" class="pd-policy-link">Read our full privacy policy →</a>
         </div>
       </div>
     </div>
@@ -495,7 +506,7 @@
       </div>
       <div class="footer-links">
         <a href="https://github.com/TRUSHAKHACHARIYA/gramai-extension" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="#privacy">Privacy</a>
+        <a href="privacy.html">Privacy Policy</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
         <a href="mailto:support@gramai.app">Support</a>
@@ -524,6 +535,7 @@
     </div>
   </dialog>
 
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,8 +1,10 @@
 // GramAI Landing Page Scripts
 
-const GITHUB_REPO = 'TRUSHAKHACHARIYA/gramai-extension';
-const CHROME_STORE_URL = '';
-const WAITLIST_ENDPOINT = '';
+const CFG = window.GRAMAI_CONFIG || {};
+const GITHUB_REPO = CFG.GITHUB_REPO || 'TRUSHAKHACHARIYA/gramai-extension';
+const CHROME_STORE_URL = CFG.CHROME_STORE_URL || '';
+const CLOUD_API_URL = CFG.CLOUD_API_URL || '';
+const WAITLIST_ENDPOINT = CFG.WAITLIST_ENDPOINT || (CLOUD_API_URL ? `${CLOUD_API_URL.replace(/\/$/, '')}/v1/waitlist` : '');
 
 // ── Billing toggle ──────────────────────────────────────────
 const toggleBtns = document.querySelectorAll('.toggle-btn');
@@ -201,6 +203,44 @@ async function loadGitHubStars() {
 
 loadGitHubStars();
 
+// ── Early access banner ─────────────────────────────────────
+async function loadEarlyAccessStats() {
+  const banner = document.getElementById('early-access-banner');
+  const countEl = document.getElementById('install-count');
+  const textEl = document.getElementById('early-access-text');
+  if (!CFG.EARLY_ACCESS) {
+    banner?.classList.add('is-hidden');
+    return;
+  }
+  if (textEl && CFG.EARLY_ACCESS_MESSAGE) {
+    textEl.textContent = `🔥 ${CFG.EARLY_ACCESS_MESSAGE}`;
+  }
+  if (!countEl) return;
+
+  let count = 0;
+  if (CLOUD_API_URL) {
+    try {
+      const res = await fetch(`${CLOUD_API_URL.replace(/\/$/, '')}/v1/waitlist/count`);
+      if (res.ok) {
+        const data = await res.json();
+        count = data.count || 0;
+      }
+    } catch {}
+  }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`);
+    if (res.ok) {
+      const data = await res.json();
+      count += (data.stargazers_count || 0) + (data.forks_count || 0);
+    }
+  } catch {}
+  if (count > 0) {
+    countEl.textContent = ` · ${count.toLocaleString()}+ early adopters`;
+  }
+}
+
+loadEarlyAccessStats();
+
 // ── Waitlist form ───────────────────────────────────────────
 const waitlistForm = document.getElementById('waitlist-form');
 const waitlistSuccess = document.getElementById('waitlist-success');
@@ -212,13 +252,16 @@ waitlistForm?.addEventListener('submit', async e => {
 
   if (WAITLIST_ENDPOINT) {
     try {
-      await fetch(WAITLIST_ENDPOINT, {
+      const res = await fetch(WAITLIST_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, source: 'landing' }),
       });
+      if (!res.ok) throw new Error('Waitlist API error');
     } catch {
-      // fall through to local success
+      const list = JSON.parse(localStorage.getItem('gramai-waitlist') || '[]');
+      if (!list.includes(email)) list.push(email);
+      localStorage.setItem('gramai-waitlist', JSON.stringify(list));
     }
   } else {
     const list = JSON.parse(localStorage.getItem('gramai-waitlist') || '[]');
